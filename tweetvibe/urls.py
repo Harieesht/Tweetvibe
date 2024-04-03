@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.home_page),
     path('tweets/<int:tweet_id>',views.tweet_detail_view),
+    path('tweets',views.tweet_list_view),
 ]

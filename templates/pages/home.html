@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+Welcome to Tweetvibe
+<div id="tweets">
+    Loading....
+</div>
+
+
+<script>
+const tweetsElement=document.getElementById('tweets')
+
+
+const xhr=new XMLHttpRequest()// creating a XMLHttpRequest object
+const method='GET' // "methodtype"
+const url='/tweets'//endpoint where we get a json object
+const responseType='json'
+
+
+function formatTweetElement(tweet){
+
+    return 
+}
+xhr.responseType=responseType
+xhr.open(method,url)
+xhr.onload=function(){
+    const serverResponse=xhr.response
+    const listeditems = serverResponse.response
+    var finalTweetStr=""
+    var i;
+    for(i=0;i<listeditems.length;i++){
+        var currentItem="<div class='mb-4'><h3>" + listeditems[i].id + "</h3>" + "<p>" + listeditems[i].content+"</p></div>"
+        finalTweetStr+= currentItem
+    }
+    tweetsElement.innerHTML=finalTweetStr
+    console.log(listeditems)
+}
+xhr.send()
+
+</script>
+{% endblock %}
