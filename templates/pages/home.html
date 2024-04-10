@@ -14,7 +14,7 @@
         <form class="form" id="tweet-create-form" method="POST" action="/create-tweet">
                 {% csrf_token %}
             <input type="hidden" value="/" name="next"/>
-            <textarea class="form-control" name="content" placeholder="your tweet..."></textarea>
+            <textarea required="required" class="form-control" name="content" placeholder="your tweet..."></textarea>
             <button type='submit' class="btn btn-primary">Tweet</button>
 
         </form>
@@ -36,6 +36,31 @@
 const handleTweetCreateFormDidSubmit=function(event){
 
     event.preventDefault()
+    const myForm=event.target
+    const myFormData=new FormData(myForm)
+    const url=myForm.getAttribute("action")
+    const method=myForm.getAttribute("method")
+    const xhr=new XMLHttpRequest()
+    const responseType='json'
+    xhr.responseType=responseType
+    xhr.open(method,url)
+    xhr.setRequestHeader("HTTP_X_REQUESTED_WITH","XMLHttpRequest")
+    xhr.setRequestHeader("x-requested-with","XMLHttpRequest")
+    xhr.onload=function(){
+        if(xhr.status==201){
+            const newTweetJson=xhr.response
+            //const newTweetJson=JSON.parse(newTweet)
+            const newTweetElement=formatTweetElement(newTweetJson)
+            const ogHtml=tweetsCointainerElement.innerHTML
+            tweetsCointainerElement.innerHtml= newTweetElement + ogHtml
+            location.reload()
+            
+        }
+        
+        
+    }
+    xhr.send(myFormData)
+    
     
 
 }
@@ -45,7 +70,7 @@ const tweetCreateFormEl=document.getElementById("tweet-create-form")
 tweetCreateFormEl.addEventListener("submit",handleTweetCreateFormDidSubmit)
 
 
-const tweetsEl=document.getElementById('tweets')
+const tweetsCointainerElement=document.getElementById('tweets')
 
 const loadTweets = function(tweetsElement){
     const xhr=new XMLHttpRequest()// creating a XMLHttpRequest object
@@ -74,7 +99,7 @@ const loadTweets = function(tweetsElement){
 
 }
 
-loadTweets(tweetsEl)
+loadTweets(tweetsCointainerElement)
 
 function handleDidLike(tweet_id,currentcount){
     console.log(tweet_id,currentcount)
