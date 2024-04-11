@@ -44,13 +44,13 @@ def tweet_detail_view(request,tweet_id,*args,**kwargs):
 
 #usermade is_ajax function because it didnt work on my machine
 def is_ajax(request):
-  return request.headers['x-requested-with'] == 'XMLHttpRequest'
+  #return request.headers['X-Requested-With'] == 'XMLHttpRequest'
+  return True
 
 #tweet creation view
 #rendering form in homepage instead seperate "form.html" page
 #next_url indicates current homepage url
 def tweet_create_view(request,*args,**kwargs):
-    print("ajax",is_ajax(request))
     form=TweetForm(request.POST or None)
     next_url=request.POST.get('next') or None
     if form.is_valid():
@@ -61,4 +61,7 @@ def tweet_create_view(request,*args,**kwargs):
         if next_url != None:
             return redirect(next_url)
         form=TweetForm()
+    if form.errors:
+        if is_ajax(request):
+            return JsonResponse(form.errors,status=400)
     return render(request,'components/form.html',context={"form":form})
