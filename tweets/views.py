@@ -3,6 +3,7 @@ from django.http import HttpResponse,JsonResponse,Http404
 from .models import *
 from .forms import TweetForm
 from django.conf import settings
+from .serializers import TweetSerializer
  
 
 ALLOWED_HOSTS=settings.ALLOWED_HOSTS
@@ -50,11 +51,19 @@ def is_ajax(request):
 #tweet creation view
 #rendering form in homepage instead seperate "form.html" page
 #next_url indicates current homepage url
-def tweet_create_view(request,*args,**kwargs):
+#pure django view
+def tweet_create_view_pure_django(request,*args,**kwargs):
+    user=request.user
+    if not request.user.is_authenticated:
+        user=None
+        if is_ajax(request):
+            return JsonResponse({},status=401)
+        return redirect(settings.LOGIN_URL)
     form=TweetForm(request.POST or None)
     next_url=request.POST.get('next') or None
     if form.is_valid():
         obj=form.save(commit=False)
+        obj.user=user 
         obj.save()
         if is_ajax(request):
             return JsonResponse(obj.serialize(),status=201)
@@ -65,3 +74,29 @@ def tweet_create_view(request,*args,**kwargs):
         if is_ajax(request):
             return JsonResponse(form.errors,status=400)
     return render(request,'components/form.html',context={"form":form})
+
+
+
+def tweet_create_view(request,*args,**kwargs):
+    data=request.POST or None
+    serializer=TweetSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return JsonResponse(serializer.data,status=201)
+    return JsonResponse({},status=400)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

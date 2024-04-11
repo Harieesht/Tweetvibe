@@ -13,6 +13,7 @@
     <div class="col-md-4 mx-auto col-10">
         <form class="form" id="tweet-create-form" method="POST" action="/create-tweet">
                 {% csrf_token %}
+                <div class="d-none alert alert-danger" id="tweet-create-form-error"></div>
             <input type="hidden" value="/" name="next"/>
             <textarea required="required" class="form-control" name="content" placeholder="your tweet..."></textarea>
             <button type='submit' class="btn btn-primary">Tweet</button>
@@ -33,6 +34,18 @@
 
 <script>
 
+const handleTweetFormError=function(msg,display){
+    var myErrorDiv=document.getElementById("tweet-create-form-error");
+    if (display===true){
+        myErrorDiv.setAttribute("class","d-block alert alert-danger")
+        myErrorDiv.innerText=msg
+    }else{
+        myErrorDiv.setAttribute("class","d-none alert alert-danger")
+
+    }
+}
+
+
 const handleTweetCreateFormDidSubmit=function(event){
 
     event.preventDefault()
@@ -48,6 +61,7 @@ const handleTweetCreateFormDidSubmit=function(event){
     xhr.setRequestHeader("X-Requested-With","XMLHttpRequest")
     xhr.onload=function(){
         if(xhr.status===201){
+            handleTweetFormError("",false)
             const newTweetJson=xhr.response
             //const newTweetJson=JSON.parse(newTweet)
             const newTweetElement=formatTweetElement(newTweetJson)
@@ -57,15 +71,22 @@ const handleTweetCreateFormDidSubmit=function(event){
             
         }else if(xhr.status===400){
             const errorJson=xhr.response
-            console.log(errorjson)
+            
             const contentError=errorJson.content
             let contentErrorMsg;
             if (contentError){
                 contentErrorMsg=contentError[0]
+                if(contentErrorMsg){
+                    handleTweetFormError(contentErrorMsg,true)
+                }else{
+                    alert("An error occured.Please try again.")
+                }
             }else{
                 alert("An error occured.please try again.")
             }
-            console.log(contentErrorMsg)
+        }else if(xhr.status==401){
+            alert("You Must login!")
+            window.location.href="/login"
         }else if(xhr.status==500){
             alert("there was a server error.Please try again.")
         }
